@@ -1,0 +1,32 @@
+31/01/2014
+- Added SetAniState and WithAniState nodes.
+- Added EnemyPatroller template.
+- Allow re-ordering of nodes using shift-up and shift-down
+
+14/01/2014
+- Added an If decorator
+- Added a Chance decorator
+- Added a Speech Bubble leaf.
+- Added tooltips to editor buttons.
+
+13/01/2014
+- Added more documentation.
+- Added more comments to examples.
+
+12/01/2014
+- Moved tools to fixed  panel on side of canvas.
+- Added multiline comments.
+
+10/12/2013
+- Changed all bool? classes to NodeResult enums. You now must yield a NodeResult type from your Actions.
+- This is primarily to reduce memory allocations on mobile devices, and provide a more clear syntax.
+
+27/11/2013
+- Added Mutating Selector (you can now create a powerful learning ability!)
+- Disabled keyboard navigation when editing inspector values.
+- Added multi-line notes.
+- Added Patterns folder showing common usage examples.
+- Added function filter.
+- Added Start and Stop Coroutine nodes.
+- Added Decorate option to context menu.
+- Added changelog. ;-)

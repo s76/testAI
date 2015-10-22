@@ -1,0 +1,74 @@
+React 
+-----
+
+IMPORTANT:
+1. Please see the readme.txt file for an example workflow and usage information.
+2. Please see the SimpleEnemy.cs file to see how to write a component which can work with React.
+3. The Patterns folder shows some example trees which are commonly used.
+
+This document lists the node types available and how they can be used. They follow the same patterns used in most behaviour tree systems.
+
+Nodes
+-----
+
+Branch Nodes
+------------
+
+Branch nodes have children, and control the flow of behaviour.
+
+Sequence: This node will run its children in order, yielding a success if all children succeed or a failure on the first child which fails.
+
+Selector: This node will run its children in order, yielding a success on the first child to succeed, or failing if none of the children succeed.
+
+Random Selector: The random selector is just like a normal selector, however instead of running its children in sequential order, it will run them in a random order.
+
+Mutating Selector: The mutating selector is just like a normal selector, however when a child succeeds, it will move that child to the top or bottom so that behaviour will be tried first or last the next time the selector is run. This is
+node which allows the tree to mutate, creating a learning AI.
+
+Parallel: This node runs its children simultaneously. It can be configured to exit as soon as a child fails or succeeds. See the Emergency Exit pattern for a good example of how this can be used.
+
+
+Leaf Nodes
+----------
+
+Leave nodes do not have children, and are generally used to perform work or check on conditions.
+
+Action: The action node is very similar to a Unity coroutine. It is used to perform tasks over several frames. The task is specified by writing an Action method. See SimpleEnemy.cs for an example.
+
+Condition: This node simply calls a function which returns a boolean. The returned value determines whether the condition succeeded or failed. See SimpleEnemy.cs for an example.
+
+Function: The function node calls a function on one of the components in the gameObject. It always succeeds.
+
+Import: The import node allows you to attach other behaviour trees to a leaf node in your behaviour tree. This allows the concept of “behaviour tree libraries” which can be reused.
+
+SendMessage: Much like the function node, this node allows you to embed a GameObject.SendMessage call in the tree.
+
+Sleep: The sleep node is used to delay execution of the tree for a period of time.
+
+StartCoroutine/StopCoroutine: A convenience node for starting and stopping coroutines.
+
+Bubble: Sends a message to game object to display a speech bubble. Note, you need to implement the graphical display of the bubble using your chosen GUI system.
+
+SetAniState: Sets a boolean flag on the Animator component.
+
+
+Decorator Nodes
+---------------
+
+Decorator nodes have exactly one child, and are used to change the behaviour of their child node in some way.
+
+Cooldown: This node will only allow its child to be run every X seconds. If it was executed in the last X seconds, it will yield a failure, otherwise it will yield the result of its child.
+
+Invert: This simple node changes the result of its child node. Success will become Failure and Failure becomes Success.
+
+Loop: This node allows you to repeatedly execute the child node a number of times before yielding success.
+
+TimeLimit: This node will yield a failure if its child takes too long to return a result. The time can be specified.
+
+UntilFailure/UntilSuccess: These nodes will repeatedly execute the child node until a Failure/Success is returned.
+
+If: Executes child if condition is true.
+
+Chance: Executes a child based on chance / probability.
+
+WithAniState: Sets a flag on the Animator component, then returns to previous value once the child has finished.
