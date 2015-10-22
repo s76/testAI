@@ -12,9 +12,9 @@ public class Node : MonoBehaviour {
 		}
 	}
 
-	void OnDrawGizmos() {
+	void OnDrawGizmosSelected() {
 		Gizmos.color = Color.magenta;
-		if ( real_transform != null ) Gizmos.DrawSphere(real_transform.position, 0.5f);
+		if ( real_transform != null ) Gizmos.DrawSphere(real_transform.position, 0.4f);
 		foreach ( var r in connectedTo ) {
 			Gizmos.DrawLine(real_transform.position, r.real_transform.position);
 		}

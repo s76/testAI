@@ -87,7 +87,7 @@ public class Barier : MonoBehaviour {
 		}
 	}
 
-	void OnDrawGizmos () {
+	void OnDrawGizmosSelected () {
 		if (side_points != null) {
 			foreach (var sp in side_points) {
 				Gizmos.color = Color.white;
