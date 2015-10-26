@@ -5,11 +5,10 @@ using System.Collections.Generic;
 public enum UnitType { Melee, Ranger } 
 
 public class UnitState : IPoolable {
-	public SquadBehavior squad;
 
 	public UnitType type;
 	public UnitSide side;
-	public UnitParameters parameters;
+	public UnitParameters2 parameters;
 	public float waypoint_path_tolerance=5;
 	public float barier_hide_position_tolerance=1;
 	public float enemy_range_penalty_factor; // 0.0 - 1.0; enemy_true_range = enemy_range * ( 1- enemy_range_penalty_factor)
@@ -26,7 +25,8 @@ public class UnitState : IPoolable {
 	public int id { get; private set; }
 	Color debug_attack_color;
 
-	List<UnitState> attackers = new List<UnitState> ();
+	List<UnitState> melee_attackers = new List<UnitState> ();
+	List<UnitState> ranger_attackers = new List<UnitState> ();
 
 	public HexCenter hex_center { get; private set; }
 	public HexCell current_cell { get; private set; }
@@ -53,7 +53,6 @@ public class UnitState : IPoolable {
 		tracked_enemy = null;
 		current_node = null;
 		enemy_range_penalty_factor = 0;
-		squad = null;
 		id = global_id_counter ++;
 		parameters.hp_current = parameters.hp_max;
 	}
@@ -77,30 +76,33 @@ public class UnitState : IPoolable {
 	}
 
 	public void OnBeingSetAsAttackTarget (UnitState attacker ) {
-		if (!attackers.Contains (attacker)) {	
-			attackers.Add(attacker);
+		if ( attacker.type == UnitType.Melee ) {
+			if (!melee_attackers.Contains (attacker)) {	
+				melee_attackers.Add(attacker);
+			}
 		}
-		foreach (var a in attackers) {
-			a.RearrangeAttackPosition(hex_center);		
+		if ( attacker.type == UnitType.Ranger ) {
+			if (!ranger_attackers.Contains (attacker)) {	
+				ranger_attackers.Add(attacker);
+			}
 		}
 	}
 
 
-	public void RearrangeAttackPosition (HexCenter hexcenter ) {
-
-		var i = hexcenter.ToHexIndex (transform.position);
-		if (hexcenter.ValidIndex (i)) {
+	public void RearrangeAttackersPosition ( ) {
+		var i = hex_center.ToHexIndex (transform.position);
+		if (hex_center.ValidIndex (i)) {
 			var cell = hex_center.GetCell(i);
 
 			if ( cell == null ) {
-				cell = hex_center.RegisterCell(i);
-				cell.unit = this;
-				current_cell = cell;
-				return;
+				throw new UnityException("should not be null , "+i + " hex_size="+hex_center.size);
 			}
-			
-			if ( cell.unit != null ) {
-				cell = cell.FreeNeighbCell (hex_center);
+
+			if ( cell.unit == null ) {
+				cell.unit = this;
+			}
+			else {
+				//cell = cell.FreeNeighbCell (hex_center);
 				if ( cell != null ) {
 					current_cell = cell;
 					cell.unit = this;
@@ -116,8 +118,15 @@ public class UnitState : IPoolable {
 	}
 
 	public void OnNotBeingSetAsAttackTarget (UnitState attacker ) {
-		if (attackers.Contains (attacker)) {	
-			attackers.Remove(attacker);
+		if ( attacker.type == UnitType.Melee ) {
+			if (melee_attackers.Contains (attacker)) {	
+				melee_attackers.Remove(attacker);
+			}
+		}
+		if ( attacker.type == UnitType.Ranger ) {
+			if (ranger_attackers.Contains (attacker)) {	
+				ranger_attackers.Remove(attacker);
+			}
 		}
 	}
 
@@ -127,13 +136,15 @@ public class UnitState : IPoolable {
 		Debug.DrawLine (transform.position, tracked_enemy.transform.position, debug_attack_color);
 		if (tracked_enemy.parameters.hp_current <= 0) {
 			tracked_enemy.Deactivate();
-
-			tracked_enemy.attackers.Clear();
+			tracked_enemy.melee_attackers.Clear();
+			tracked_enemy.ranger_attackers.Clear();
 			tracked_enemy = null;
 		}
 	}
 
 	void OnDrawGizmosSelected () {
+		if ( melee_attackers.Count + ranger_attackers.Count > 0 ) hex_center.DrawGizmos();
+
 		UnityEditor.Handles.color = Color.green;
 		UnityEditor.Handles.DrawWireDisc (transform.position, transform.up, parameters.sight_range);
 

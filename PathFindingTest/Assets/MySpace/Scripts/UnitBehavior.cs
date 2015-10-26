@@ -134,9 +134,8 @@ public class UnitBehavior : MonoBehaviour {
 		unit_state.agent.Stop ();
 		unit_state.agent.velocity = Vector3.zero;
 		current_behavior_state = BehaviorState.Attack;
-
+		unit_state.tracked_enemy.RearrangeAttackersPosition();
 		yield return NodeResult.Success;
-		
 	}
 
 
@@ -168,7 +167,7 @@ public class UnitBehavior : MonoBehaviour {
 			unit_state.DealDamageToTrackedEnemy ();
 		} else {
 			if ( unit_state.current_cell != null ) {
-				unit_state.agent.SetDestination(unit_state.position );
+				unit_state.agent.SetDestination(unit_state.current_cell.position );
 			}
 		}
 		yield return NodeResult.Success;
