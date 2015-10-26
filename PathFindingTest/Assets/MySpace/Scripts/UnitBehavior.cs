@@ -18,6 +18,7 @@ public class UnitBehavior : MonoBehaviour {
 
 	static GameController game_controller;
 
+	int tracked_enemy_id;
 	
 	static int walls_mask = LayerMask.GetMask("walls");
 	static int bariers_mask = LayerMask.GetMask("bariers");
@@ -62,12 +63,17 @@ public class UnitBehavior : MonoBehaviour {
 			unit_state.tracked_enemy = null;
 			return false;
 		}
+		if ( tracked_enemy_id != unit_state.tracked_enemy.id ) {
+			unit_state.tracked_enemy = null;
+			return false;
+		}
 		return true;
 	}
 	
 	public bool IsTrackedEnemyInRange () {
 		if (HasTrackedEnemy ()) {
-			return (unit_state.tracked_enemy.transform.position - transform.position).magnitude <= unit_state.parameters.attack_range  * ( 1- unit_state.tracked_enemy.enemy_range_penalty_factor);
+			return Physics.Linecast(transform.position,unit_state.tracked_enemy.transform.position,bariers_mask)
+				&& (unit_state.tracked_enemy.transform.position - transform.position).magnitude <= unit_state.parameters.attack_range  * ( 1- unit_state.tracked_enemy.enemy_range_penalty_factor);
 		}
 		return false;
 	}
@@ -75,7 +81,11 @@ public class UnitBehavior : MonoBehaviour {
 	public bool IsEnemyInSight() {
 		var e = GetClosestActiveEnemy ();
 		if (e != null) {
-			if ( !HasTrackedEnemy () ) unit_state.tracked_enemy = e;
+			if ( !HasTrackedEnemy () ) {
+				unit_state.tracked_enemy = e;
+				tracked_enemy_id = unit_state.tracked_enemy.id;
+				e.OnBeingSetAsAttackTarget(unit_state);
+			}
 			return true;
 		} 
 		return false;
@@ -86,17 +96,7 @@ public class UnitBehavior : MonoBehaviour {
 			return false;
 
 		if (HasTrackedEnemy ()) {
-			if ( unit_state.squad != null ) {
-				// have my team around
-				
-				// enemy has no squad, just screw him
-				if ( unit_state.tracked_enemy.squad == null ) return false;
-				
-				// if their squads too small, screw them
-				if ( unit_state.tracked_enemy.squad.members.Count < unit_state.squad.members.Count* 0.3f ) return false;
-				
-				
-			}
+
 		}
 		return false;
 	}
@@ -117,7 +117,6 @@ public class UnitBehavior : MonoBehaviour {
 
 	/* ########################## State defining actions ############################ */
 	public Action ApproachEnemy () {
-		Debug.Log ("ApproachEnemy");
 		current_behavior_state = BehaviorState.Approach;
 		unit_state.agent.SetDestination (unit_state.tracked_enemy.transform.position);
 		yield return NodeResult.Success;
@@ -132,16 +131,16 @@ public class UnitBehavior : MonoBehaviour {
 	*/
 
 	public Action Attack () {
-		Debug.Log ("Attack");
 		unit_state.agent.Stop ();
 		unit_state.agent.velocity = Vector3.zero;
 		current_behavior_state = BehaviorState.Attack;
+
 		yield return NodeResult.Success;
 		
 	}
 
+
 	public Action MoveAlongPath () {
-		Debug.Log ("MoveAlongPath");
 		current_behavior_state = BehaviorState.MoveAlongPath;
 		unit_state.agent.SetDestination (unit_state.current_node.real_transform.position);
 		unit_state.agent.Resume ();
@@ -149,14 +148,12 @@ public class UnitBehavior : MonoBehaviour {
 	}
 
 	public Action Reposition () {
-		Debug.Log ("Reposition");
 		current_behavior_state = BehaviorState.Reposition;
 		yield return NodeResult.Success;
 
 	}
 
 	public Action WaitInPosition () {
-		Debug.Log ("WaitInPosition");
 		current_behavior_state = BehaviorState.WaitInPosition;
 		yield return NodeResult.Success;
 	}
@@ -169,6 +166,10 @@ public class UnitBehavior : MonoBehaviour {
 		if (game_controller.timer - last_attack_timer > unit_state.parameters.attack_cd) {
 			last_attack_timer = game_controller.timer;
 			unit_state.DealDamageToTrackedEnemy ();
+		} else {
+			if ( unit_state.current_cell != null ) {
+				unit_state.agent.SetDestination(unit_state.position );
+			}
 		}
 		yield return NodeResult.Success;
 	}

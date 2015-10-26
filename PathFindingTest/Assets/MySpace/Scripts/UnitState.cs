@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public enum UnitType { Melee, Ranger } 
 
@@ -22,13 +23,20 @@ public class UnitState : IPoolable {
 	static int global_id_counter = 0;
 	static GameController game_controller;
 
-	int id;
+	public int id { get; private set; }
 	Color debug_attack_color;
+
+	List<UnitState> attackers = new List<UnitState> ();
+
+	public HexCenter hex_center { get; private set; }
+	public HexCell current_cell { get; private set; }
+
 
 	void Awake () {
 		id = global_id_counter ++;			
 		agent = GetComponent<NavMeshAgent> ();
 		debug_attack_color = GetComponent<MeshRenderer> ().material.color;
+		hex_center = GetComponent<HexCenter> ();
 	}
 
 	void Start () {
@@ -36,9 +44,12 @@ public class UnitState : IPoolable {
 		game_controller.RegisterUnit (this);
 	}
 
+
 	public override void Activate ()
 	{
 		base.Activate ();
+		current_cell = null;
+
 		tracked_enemy = null;
 		current_node = null;
 		enemy_range_penalty_factor = 0;
@@ -65,12 +76,59 @@ public class UnitState : IPoolable {
 		}
 	}
 
+	public void OnBeingSetAsAttackTarget (UnitState attacker ) {
+		if (!attackers.Contains (attacker)) {	
+			attackers.Add(attacker);
+		}
+		foreach (var a in attackers) {
+			a.RearrangeAttackPosition(hex_center);		
+		}
+	}
+
+
+	public void RearrangeAttackPosition (HexCenter hexcenter ) {
+
+		var i = hexcenter.ToHexIndex (transform.position);
+		if (hexcenter.ValidIndex (i)) {
+			var cell = hex_center.GetCell(i);
+
+			if ( cell == null ) {
+				cell = hex_center.RegisterCell(i);
+				cell.unit = this;
+				current_cell = cell;
+				return;
+			}
+			
+			if ( cell.unit != null ) {
+				cell = cell.FreeNeighbCell (hex_center);
+				if ( cell != null ) {
+					current_cell = cell;
+					cell.unit = this;
+					return;
+				}
+				else {
+					Debug.LogError("shititititisi ");
+				}
+			}
+		} else {
+			throw new UnityException("Hex index is not valid");
+		}
+	}
+
+	public void OnNotBeingSetAsAttackTarget (UnitState attacker ) {
+		if (attackers.Contains (attacker)) {	
+			attackers.Remove(attacker);
+		}
+	}
+
 	public void DealDamageToTrackedEnemy () {
 		tracked_enemy.parameters.hp_current -= parameters.attack_damage;
 
 		Debug.DrawLine (transform.position, tracked_enemy.transform.position, debug_attack_color);
 		if (tracked_enemy.parameters.hp_current <= 0) {
 			tracked_enemy.Deactivate();
+
+			tracked_enemy.attackers.Clear();
 			tracked_enemy = null;
 		}
 	}
