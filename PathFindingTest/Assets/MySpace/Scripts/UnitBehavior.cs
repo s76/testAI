@@ -18,6 +18,7 @@ public class UnitBehavior : MonoBehaviour {
 
 	static GameController game_controller;
 
+	int tracked_enemy_id;
 	
 	static int walls_mask = LayerMask.GetMask("walls");
 	static int bariers_mask = LayerMask.GetMask("bariers");
@@ -64,6 +65,7 @@ public class UnitBehavior : MonoBehaviour {
 			unit_state.tracked_enemy = null;
 			return false;
 		}
+<<<<<<< HEAD
 
 		if (unit_state.tracked_enemy.id != tracked_enemy_id ) {
 			unit_state.tracked_enemy = null;
@@ -71,13 +73,25 @@ public class UnitBehavior : MonoBehaviour {
 			return false;
 		}
 
+=======
+		if ( tracked_enemy_id != unit_state.tracked_enemy.id ) {
+			unit_state.tracked_enemy = null;
+			return false;
+		}
+>>>>>>> 705ae7e327bf77270369c414447c8bc999073130
 		return true;
 	}
 	
 	public bool IsTrackedEnemyInRange () {
+<<<<<<< HEAD
 		if (HasTrackedEnemy ()) {	
 			return !Physics.Linecast(unit_state.tracked_enemy.transform.position, transform.position,walls_mask) &&
 				(unit_state.tracked_enemy.transform.position - transform.position).magnitude <= unit_state.parameters.attack_range  * ( 1- unit_state.tracked_enemy.enemy_range_penalty_factor);
+=======
+		if (HasTrackedEnemy ()) {
+			return Physics.Linecast(transform.position,unit_state.tracked_enemy.transform.position,bariers_mask)
+				&& (unit_state.tracked_enemy.transform.position - transform.position).magnitude <= unit_state.parameters.attack_range  * ( 1- unit_state.tracked_enemy.enemy_range_penalty_factor);
+>>>>>>> 705ae7e327bf77270369c414447c8bc999073130
 		}
 		return false;
 	}
@@ -87,7 +101,12 @@ public class UnitBehavior : MonoBehaviour {
 		if (e != null) {
 			if ( !HasTrackedEnemy () ) {
 				unit_state.tracked_enemy = e;
+<<<<<<< HEAD
 				tracked_enemy_id = e.id;
+=======
+				tracked_enemy_id = unit_state.tracked_enemy.id;
+				e.OnBeingSetAsAttackTarget(unit_state);
+>>>>>>> 705ae7e327bf77270369c414447c8bc999073130
 			}
 			return true;
 		} 
@@ -100,6 +119,7 @@ public class UnitBehavior : MonoBehaviour {
 
 		if (HasTrackedEnemy ()) {
 
+<<<<<<< HEAD
 		}
 
 		if (flock_force != Vector3.zero) {
@@ -108,6 +128,8 @@ public class UnitBehavior : MonoBehaviour {
 
 			//unit_state.agent.Resume();
 			//unit_state.agent.SetDestination(flock_pos);
+=======
+>>>>>>> 705ae7e327bf77270369c414447c8bc999073130
 		}
 		return false;
 	}
@@ -128,7 +150,10 @@ public class UnitBehavior : MonoBehaviour {
 
 	/* ########################## State defining actions ############################ */
 	public Action ApproachEnemy () {
+<<<<<<< HEAD
 		unit_state.agent.avoidancePriority = 20;
+=======
+>>>>>>> 705ae7e327bf77270369c414447c8bc999073130
 		current_behavior_state = BehaviorState.Approach;
 		unit_state.agent.SetDestination (unit_state.tracked_enemy.transform.position);
 		yield return NodeResult.Success;
@@ -142,7 +167,11 @@ public class UnitBehavior : MonoBehaviour {
 	}
 	*/
 
+<<<<<<< HEAD
 	public Action Attack () { 
+=======
+	public Action Attack () {
+>>>>>>> 705ae7e327bf77270369c414447c8bc999073130
 		unit_state.agent.Stop ();
 		unit_state.agent.velocity = Vector3.zero;
 		
@@ -153,16 +182,20 @@ public class UnitBehavior : MonoBehaviour {
 
 		//GetComponent<NavMeshObstacle> ().enabled = true;
 		current_behavior_state = BehaviorState.Attack;
+		unit_state.tracked_enemy.RearrangeAttackersPosition();
 		yield return NodeResult.Success;
-		
 	}
 
+
 	public Action MoveAlongPath () {
+<<<<<<< HEAD
 		if (unit_state.type == UnitType.Melee)
 			unit_state.agent.avoidancePriority = 4;
 		if (unit_state.type == UnitType.Ranger)
 			unit_state.agent.avoidancePriority = 5;
 
+=======
+>>>>>>> 705ae7e327bf77270369c414447c8bc999073130
 		current_behavior_state = BehaviorState.MoveAlongPath;
 		if ( unit_state.current_node != null ) unit_state.agent.SetDestination (unit_state.current_node.real_transform.position);
 		unit_state.agent.Resume ();
@@ -242,6 +275,7 @@ public class UnitBehavior : MonoBehaviour {
 		if (game_controller.timer - last_attack_timer > unit_state.parameters.attack_cd) {
 			last_attack_timer = game_controller.timer;
 			unit_state.DealDamageToTrackedEnemy ();
+<<<<<<< HEAD
 		} 
 		if ( !HasTrackedEnemy() ) yield return NodeResult.Success;
 		if ( unit_state.type == UnitType.Ranger ) {
@@ -258,6 +292,11 @@ public class UnitBehavior : MonoBehaviour {
 					flock_force += dif.normalized * flock_strength;
 					//Debug.DrawLine(transform.position, l.transform.position,Color.white);
     			}
+=======
+		} else {
+			if ( unit_state.current_cell != null ) {
+				unit_state.agent.SetDestination(unit_state.current_cell.position );
+>>>>>>> 705ae7e327bf77270369c414447c8bc999073130
 			}
 		}
 
