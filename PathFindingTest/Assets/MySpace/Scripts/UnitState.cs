@@ -22,7 +22,7 @@ public class UnitState : IPoolable {
 	static int global_id_counter = 0;
 	static GameController game_controller;
 
-	int id;
+	public int id { get; private set; }
 	Color debug_attack_color;
 
 	void Awake () {
