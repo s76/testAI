@@ -52,7 +52,7 @@ public class UnitReact : MonoBehaviour
 	
 	public bool CanReachTarget () {	
 
-		return false;
+		return true;
 	}
 	
 	public bool TryGettingAvailableBarier () {
@@ -74,6 +74,8 @@ public class UnitReact : MonoBehaviour
 	}
 	/* ########################## State defining actions ############################ */
 	public Action ApproachEnemy () {
+		OnSteering = false;
+		CancelInvoke ();
 		current_behavior_state = BehaviorState.Approach;
 		core.agent.avoidancePriority = 20;
 		core.agent.SetDestination (core.tracked_enemy.transform.position);
@@ -113,6 +115,7 @@ public class UnitReact : MonoBehaviour
 	}
 	
 	public Action TryMoveAround () {
+		core.agent.Stop ();
 		current_behavior_state = BehaviorState.TryMoveAround;
 		steering_timer = 0;
 		canTakeBackControlFromManualSteering = false;
@@ -133,7 +136,10 @@ public class UnitReact : MonoBehaviour
 	float steering_timer;
 	bool canTakeBackControlFromManualSteering;
 
+	public bool OnSteering;
+
 	void ManualSteering () {
+		OnSteering = true;
 		steering.Process (transform, steering_update_freq);
 		steering_timer += steering_update_freq;
 		if (steering_timer > max_time_steering)

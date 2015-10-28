@@ -32,8 +32,6 @@ public class Steering2
 		Vector3 detect_ray = dir * detect_range;
 		
 		RaycastHit hit, left_hit, right_hit;
-		
-		Debug.DrawLine (unit.position, unit.position + detect_ray, Color.magenta);
 
 		Vector3 main_steer = Vector3.zero;
 		Vector3 left_steer = Vector3.zero;
@@ -49,9 +47,7 @@ public class Steering2
 			}
 
 			left_steer = Vec90(left_hit.point - unit.position,unit.forward) * 0.75f * strength ;
-			
-			Debug.DrawLine (unit.position,left_hit.point , Color.red );
-			Debug.DrawLine (unit.position,unit.position + Vec90(left_hit.point - unit.position,unit.forward));
+
 		} else if ( r = Physics.Linecast (unit.position, unit.position + right45, out right_hit)) {
 			if (!keep_side) {
 				keep_side = true;
