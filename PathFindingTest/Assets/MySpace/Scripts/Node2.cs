@@ -29,7 +29,7 @@ public class Node2 : MonoBehaviour {
 	void Start () {
 		gc = GameObject.FindObjectOfType<GameController> ();
 	}
-	void OnDrawGizmosSelected() {
+	void OnDrawGizmosSelected () {
 		if (gc == null) {
 			Gizmos.color = Color.magenta;
 			foreach (var r in connectionsToSide02) {

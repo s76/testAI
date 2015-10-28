@@ -9,7 +9,7 @@ public class UnitPool : MonoBehaviour {
 
 	List<UnitCore> list;
 	
-	public void Awake () {
+	void Awake () {
 		if ( initCap < 0 ) throw new UnityException("initCap < 0 ");
 
 		list = new List<UnitCore>(initCap);
