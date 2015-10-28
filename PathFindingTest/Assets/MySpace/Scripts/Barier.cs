@@ -34,7 +34,7 @@ public class Barier : MonoBehaviour {
 		_side_points = null;
 	}
 
-	public void TestIfBarierSuitableToHide ( UnitState unit, Vector3 precalculated_toEnemyVector, ref float global_min, ref Barier barier ) {
+	public void TestIfBarierSuitableToHide ( UnitCore unit, Vector3 precalculated_toEnemyVector, ref float global_min, ref Barier barier ) {
 		var unit_position = unit.transform.position;
 
 

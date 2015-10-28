@@ -20,7 +20,7 @@ public class Spawner2 : MonoBehaviour {
 		gameController = GameObject.FindObjectOfType<GameController> ();
 	}
 
-	public UnitState SpawnUnit ( UnitType t ) {
+	public UnitCore SpawnUnit ( UnitType t ) {
 		UnitPool p = null;
 		dict.TryGetValue (t, out p);
 		var g = p.Get ();

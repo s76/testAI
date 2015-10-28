@@ -9,15 +9,15 @@ public class GameController : MonoBehaviour {
 
 	public int game_seed;
 
-	Dictionary<UnitSide, List<UnitState> > db;
-	List<UnitState> side01;
-	List<UnitState> side02;
+	Dictionary<UnitSide, List<UnitCore> > db;
+	List<UnitCore> side01;
+	List<UnitCore> side02;
 
 	public bool node_display_fromSide02=false;
 
 	void Awake () {
-		side01 = new List<UnitState> ();
-		side02 = new List<UnitState> ();
+		side01 = new List<UnitCore> ();
+		side02 = new List<UnitCore> ();
 
 		Random.seed = game_seed;
 		mutationTables = new int[128];
@@ -54,12 +54,12 @@ public class GameController : MonoBehaviour {
 		}
 	}
 
-	public void RegisterUnit ( UnitState unit ) {
+	public void RegisterUnit ( UnitCore unit ) {
 		var l = unit.side == UnitSide.Side01 ? side01 : side02; 
 		if ( !l.Contains(unit) ) l.Add (unit);
 	}
 
-	public List<UnitState> GetUnitListOfOppositeSide ( UnitSide side ) {
+	public List<UnitCore> GetUnitListOfOppositeSide ( UnitSide side ) {
 		return side == UnitSide.Side01? side02 : side01;
 	}
 }
