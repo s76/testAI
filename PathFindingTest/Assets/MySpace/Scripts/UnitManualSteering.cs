@@ -128,7 +128,7 @@ public class UnitManualSteering : MonoBehaviour
 				tmp01 = Degree90LineCast (transform.position - hit.point, hit.normal) * 0.5f * strength;
 				
 				dir = (hit.point + tmp01 - transform.position).normalized;
-				Debug.DrawLine (hit.point, hit.point + tmp01, Color.yellow);
+				//Debug.DrawLine (hit.point, hit.point + tmp01, Color.yellow);
 			}
 
 			if (_is_left_hit & _is_right_hit) {
@@ -168,6 +168,8 @@ public class UnitManualSteering : MonoBehaviour
 		}
 		
 		var q = Quaternion.LookRotation(dir);
+
+		Debug.DrawLine (transform.position, transform.position + dir, Color.yellow);
 		transform.rotation = Quaternion.Slerp(transform.rotation,q,turn_speed*Time.deltaTime);
 		transform.position += dir*speed*Time.deltaTime;
 		
