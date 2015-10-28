@@ -19,8 +19,6 @@ public class UnitManualSteering : MonoBehaviour
 	bool conner;
 	RaycastHit conner_anchor;
 	Vector3 dir = Vector3.zero;
-	
-	RaycastHit2D[] hits =new RaycastHit2D[1];
 
 	void OnDrawGizmos () {
 		dir = transform.forward;

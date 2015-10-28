@@ -36,8 +36,8 @@ public class UnitReact : MonoBehaviour
 		return current_behavior_state == BehaviorState.Attack;
 	}
 	
-	public bool IsRepositioning () {
-		return current_behavior_state == BehaviorState.Reposition;
+	public bool IsTryingToMoveAround () {
+		return current_behavior_state == BehaviorState.TryMoveAround;
 	}
 	
 	public bool IsWaitingInPosition () {
@@ -49,25 +49,9 @@ public class UnitReact : MonoBehaviour
 	}
 	
 	/* ########################## Situational judgment tests ############################ */
-	public bool HasTrackedEnemy () {
-		return core.HasEnemy();
-	}
 	
-	public bool IsTrackedEnemyInRange () {
-		return core.EnemyInRange();
-	}
-	
-	public bool IsEnemyInSight() {
-		return core.EnemyInSight ();
-	}
-	
-	public bool NeedRepositioning () {	
-		if (core.type == UnitType.Melee)
-			return false;
-		
-		if (core.HasEnemy()) {
-			
-		}
+	public bool CanReachTarget () {	
+
 		return false;
 	}
 	
@@ -80,8 +64,14 @@ public class UnitReact : MonoBehaviour
 	public bool IsCurrentHidePosOk () {
 		return false;
 	}
-	
-	
+
+	public bool TriedToMoveAround () {
+		return core._tried_to_move_around;
+	}
+
+	public bool CanTakeControlFromManualSteering () {
+		return canTakeBackControlFromManualSteering;
+	}
 	/* ########################## State defining actions ############################ */
 	public Action ApproachEnemy () {
 		current_behavior_state = BehaviorState.Approach;
@@ -89,7 +79,12 @@ public class UnitReact : MonoBehaviour
 		core.agent.SetDestination (core.tracked_enemy.transform.position);
 		yield return NodeResult.Success;
 	}
-	
+
+	public Action DoGhostJump () {
+
+		yield return NodeResult.Success;
+	}
+
 	
 	public Action Attack () {
 		core.agent.Stop ();
@@ -112,12 +107,16 @@ public class UnitReact : MonoBehaviour
 			core.agent.avoidancePriority = 5;
 		
 		current_behavior_state = BehaviorState.MoveAlongPath;
+		core.IgnoreCurrentEnemy ();
 		core.ReturnToCurrentNode();
 		yield return NodeResult.Success;
 	}
 	
-	public Action Reposition () {
-		current_behavior_state = BehaviorState.Reposition;
+	public Action TryMoveAround () {
+		current_behavior_state = BehaviorState.TryMoveAround;
+		steering_timer = 0;
+		canTakeBackControlFromManualSteering = false;
+		InvokeRepeating ("ManualSteering", 0f, steering_update_freq);
 		yield return NodeResult.Success;
 	}
 	
@@ -125,7 +124,22 @@ public class UnitReact : MonoBehaviour
 		current_behavior_state = BehaviorState.WaitInPosition;
 		yield return NodeResult.Success;
 	}
-	
+
+	/* ########################## Try to move around - steering job ################### */
+
+	Steering2 steering = new Steering2();
+	public float steering_update_freq = 0.05f;
+	public float max_time_steering = 6f;
+	float steering_timer;
+	bool canTakeBackControlFromManualSteering;
+
+	void ManualSteering () {
+		steering.Process (transform, steering_update_freq);
+		steering_timer += steering_update_freq;
+		if (steering_timer > max_time_steering)
+			canTakeBackControlFromManualSteering = true;
+	}
+
 	/* ########################## action functions ############################ */
 	Vector3 last_approach_pos;
 	public Action DoApproachEnemy () {

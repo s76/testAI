@@ -19,7 +19,7 @@ public class UnitCore : IPoolable {
 	public Node2 current_node;
 	public NavMeshAgent agent { get; private set; }
 	public int id { get; private set; }
-
+	public bool _tried_to_move_around { get; private set; }
 	
 	Color debug_attack_color;	
 
@@ -50,9 +50,14 @@ public class UnitCore : IPoolable {
 
 	
 	// ####################### core functions ################################### //
+	public void IgnoreCurrentEnemy () {
+		tracked_enemy = null;
+	}
+
+
 	int last_tracked_enemy_id = -1;
 
-	public bool HasEnemy () {
+	public bool HasTrackedEnemy () {
 		if (tracked_enemy == null) 
 			return false;
 		if (!tracked_enemy.isActiveAndEnabled) {
@@ -66,20 +71,21 @@ public class UnitCore : IPoolable {
 		return true;
 	}
 
-	public bool EnemyInSight () {
+	public bool IsEnemyInSight () {
 		var e = GetClosestActiveEnemy ();
 		if (e != null) {
-			if ( !HasEnemy () ) {
+			if ( !HasTrackedEnemy () ) {
 				tracked_enemy = e;
 				last_tracked_enemy_id = e.id;
+				_tried_to_move_around = false;
 			}
 			return true;
 		} 
 		return false;
 	}
 
-	public bool EnemyInRange () {
-		if (HasEnemy ()) {	
+	public bool IsTrackedEnemyInRange () {
+		if (HasTrackedEnemy ()) {	
 			return !Physics.Linecast(tracked_enemy.transform.position, transform.position,walls_mask) &&
 				(tracked_enemy.transform.position - transform.position).magnitude <= parameters.attack_range  * ( 1- tracked_enemy.enemy_range_penalty_factor);
 		}
@@ -128,7 +134,7 @@ public class UnitCore : IPoolable {
 	public Barier GetClosestBarier () {
 		throw new UnityException("unimplemented");
 		
-		if ( !HasEnemy() ) return null;
+		if ( !HasTrackedEnemy() ) return null;
 		
 		//		var bariers = game_controller.bariers;
 		//		var vector_to_enemy = tracked_enemy.transform.position - transform.position;

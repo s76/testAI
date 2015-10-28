@@ -16,4 +16,4 @@ public enum UnitSide:int { Side01=0, Side02=1 }
 
 public enum UnitType { Melee, Ranger } 
 
-public enum BehaviorState { MoveAlongPath, Attack, Approach, Reposition,WaitInPosition }
+public enum BehaviorState { MoveAlongPath, Attack, Approach, TryMoveAround, WaitInPosition }
