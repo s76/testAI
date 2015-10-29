@@ -4,21 +4,23 @@ using React;
 
 using  Action = System.Collections.Generic.IEnumerator<React.NodeResult>;
 
-public class UnitReact2 : MonoBehaviour
+
+
+public class UnitReact : MonoBehaviour
 {
 	static GameController game_controller;
 	static int walls_mask = LayerMask.GetMask("walls");
 	static int bariers_mask = LayerMask.GetMask("bariers");
-
+	
 	[SerializeField] BehaviorState current_behavior_state = BehaviorState.MoveAlongPath;
-
+	
 	Reactor reactor;
 	UnitCore core;
 	
 	int tracked_enemy_id;
-
+	
 	public bool showDebug;
-
+	
 	/* ########################## core mono functions ######################## */
 	void Awake () {
 		reactor = GetComponent<Reactor> ();
@@ -56,7 +58,7 @@ public class UnitReact2 : MonoBehaviour
 	}
 	
 	/* ########################## Situational judgment tests ############################ */
-
+	
 	void OnDrawGizmosSelected () {
 		
 		if (showDebug) {
@@ -66,11 +68,11 @@ public class UnitReact2 : MonoBehaviour
 			UnityEditor.Handles.color = Color.green;
 			UnityEditor.Handles.DrawLine (transform.position, transform.position + steering.dir);
 		}
-
+		
 	}
 	public float reach_check_range=0.6f;
-
-
+	
+	
 	public bool CanReachTarget () {	
 		var k = core.IsTrackedEnemyInRange ();
 		if (!k) {
@@ -78,7 +80,7 @@ public class UnitReact2 : MonoBehaviour
 			var to_target = ( core.tracked_enemy.transform.position - transform.position).normalized;
 			Vector3 left25 = Quaternion.Euler(0, -25, 0) * to_target;
 			Vector3 right25 = Quaternion.Euler(0, 25, 0) * to_target;
-
+			
 			RaycastHit hit;
 			if ( Physics.Linecast(transform.position,transform.position + to_target * reach_check_range, out hit ) ) {
 				debug.Log (showDebug, 102, "obstacle in front of me");
@@ -86,7 +88,7 @@ public class UnitReact2 : MonoBehaviour
 					debug.Log (showDebug, 103, "obstacles len to neemy > attack range * 0.8");
 					
 					RaycastHit hit_r,hit_l;
-
+					
 					if ( Physics.Linecast(transform.position,transform.position + right25 * reach_check_range, out hit_r ) 
 					    && Physics.Linecast(transform.position,transform.position + left25 * reach_check_range, out hit_l )
 					    ) {
@@ -104,7 +106,7 @@ public class UnitReact2 : MonoBehaviour
 	public bool TryGettingAvailableBarier () {
 		var b = core.GetClosestBarier ();
 		debug.Log (showDebug, 11, "TryGettingAvailableBarier");
-
+		
 		return false;
 	}
 	
@@ -112,12 +114,12 @@ public class UnitReact2 : MonoBehaviour
 		debug.Log (showDebug, 12, "IsCurrentHidePosOk");
 		return false;
 	}
-
+	
 	public bool TriedToMoveAround () {
 		debug.Log (showDebug, 13, "TriedToMoveAround");
 		return core._tried_to_move_around;
 	}
-
+	
 	public bool CanTakeControlFromManualSteering () {
 		debug.Log (showDebug, 14, "CanTakeControlFromManualSteering", canTakeBackControlFromManualSteering);
 		return canTakeBackControlFromManualSteering;
@@ -136,13 +138,13 @@ public class UnitReact2 : MonoBehaviour
 		}
 		yield return NodeResult.Success;
 	}
-
+	
 	public Action DoGhostJump () {
 		debug.Log (showDebug, 21, "DoGhostJump");
-
+		
 		yield return NodeResult.Success;
 	}
-
+	
 	
 	public Action Attack () {
 		debug.Log (showDebug, 22, "Attack");
@@ -150,9 +152,9 @@ public class UnitReact2 : MonoBehaviour
 		//core.agent.velocity = Vector3.zero;
 		
 		//if (core.type == UnitType.Melee)
-			//core.agent.avoidancePriority = 6;
+		//core.agent.avoidancePriority = 6;
 		//if (core.type == UnitType.Ranger)
-			//core.agent.avoidancePriority = 10;
+		//core.agent.avoidancePriority = 10;
 		
 		current_behavior_state = BehaviorState.Attack;
 		yield return NodeResult.Success;
@@ -161,21 +163,21 @@ public class UnitReact2 : MonoBehaviour
 	
 	public Action MoveAlongPath () {
 		debug.Log (showDebug, 23, "MoveAlongPath");
-	//	if (core.type == UnitType.Melee)
-	//		core.agent.avoidancePriority = 4;
-	//	if (core.type == UnitType.Ranger)
+		//	if (core.type == UnitType.Melee)
+		//		core.agent.avoidancePriority = 4;
+		//	if (core.type == UnitType.Ranger)
 		//	core.agent.avoidancePriority = 5;
-
-	//	if (!core.agent.isActiveAndEnabled)
+		
+		//	if (!core.agent.isActiveAndEnabled)
 		//	core.agent.enabled = true;
 		current_behavior_state = BehaviorState.MoveAlongPath;
 		core.IgnoreCurrentEnemy ();
 		core.ReturnToCurrentNode();
 		yield return NodeResult.Success;
 	}
-
+	
 	DebugX debug = new DebugX();
-
+	
 	public Action TryMoveAround () {
 		debug.Log (showDebug, 24, "TryMoveAround");
 		core.agent.Stop ();
@@ -192,17 +194,17 @@ public class UnitReact2 : MonoBehaviour
 		current_behavior_state = BehaviorState.WaitInPosition;
 		yield return NodeResult.Success;
 	}
-
+	
 	/* ########################## Try to move around - steering job ################### */
-
+	
 	Steering2 steering = new Steering2();
 	public float steering_update_freq = 0.05f;
 	public float max_time_steering = 6f;
 	float steering_timer;
 	bool canTakeBackControlFromManualSteering;
-
+	
 	public bool OnSteering;
-
+	
 	void ManualSteering () {
 		OnSteering = true;
 		steering.showDebug = showDebug;
@@ -211,7 +213,7 @@ public class UnitReact2 : MonoBehaviour
 		if (steering_timer > max_time_steering)
 			canTakeBackControlFromManualSteering = true;
 	}
-
+	
 	/* ########################## action functions ############################ */
 	Vector3 last_approach_pos;
 	public Action DoApproachEnemy () {
@@ -223,7 +225,7 @@ public class UnitReact2 : MonoBehaviour
 		} 
 		yield return NodeResult.Success;
 	}
-
+	
 	double last_attack_timer = 0.0;
 	
 	public Action LaunchAttack () {

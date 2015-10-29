@@ -17,7 +17,7 @@ public class UnitCore : IPoolable {
 	public UnitCore tracked_enemy;   // !read-only 
 	
 	public Node2 current_node;
-	public NavMeshAgent agent { get; private set; }
+	public AgentX agent { get; private set; }
 	public int id { get; private set; }
 	public bool _tried_to_move_around { get; private set; }
 	
@@ -27,7 +27,7 @@ public class UnitCore : IPoolable {
 	
 	void Awake () {
 		id = global_id_counter ++;			
-		agent = GetComponent<NavMeshAgent> ();
+		agent = GetComponent<AgentX> ();
 		debug_attack_color = GetComponent<MeshRenderer> ().material.color;
 	}
 	
@@ -105,8 +105,7 @@ public class UnitCore : IPoolable {
 
 	public void SetSpawner (Spawner2 spawner ) {
 		current_node = spawner.startNode;
-		agent.Warp (spawner.startNode.real_transform.position);
-		agent.ResetPath ();
+		transform.position = spawner.startNode.real_transform.position;
 		agent.SetDestination (spawner.startNode.real_transform.position);
 	}
 	
@@ -158,20 +157,18 @@ public class UnitCore : IPoolable {
 		UnityEditor.Handles.color = Color.magenta;
 		UnityEditor.Handles.DrawWireDisc (transform.position, transform.up, tracked_enemy == null ? parameters.attack_range : parameters.attack_range * (1 - tracked_enemy.enemy_range_penalty_factor ));
 		
-		UnityEditor.Handles.color = Color.cyan;
-		UnityEditor.Handles.DrawWireDisc (transform.position, transform.up, parameters.barier_search_range);
+	//	UnityEditor.Handles.color = Color.cyan;
+	//	UnityEditor.Handles.DrawWireDisc (transform.position, transform.up, parameters.barier_search_range);
 		
 		
 		UnityEditor.Handles.color = Color.yellow;
 		UnityEditor.Handles.DrawWireDisc (transform.position, transform.up, waypoint_path_tolerance);
+
 		
-		UnityEditor.Handles.color = Color.Lerp(Color.green, Color.red, 0.5f);
-		UnityEditor.Handles.DrawWireDisc (transform.position, transform.up, waypoint_path_tolerance);
-		
-		if (current_node != null) {
-			Gizmos.color = Color.white;
-			Gizmos.DrawLine (transform.position, current_node.real_transform.position);
-		}
+	//	if (current_node != null) {
+	//		Gizmos.color = Color.white;
+	//		Gizmos.DrawLine (transform.position, current_node.real_transform.position);
+	//	}
 		
 		if (tracked_enemy != null) {
 			Gizmos.color = Color.gray;

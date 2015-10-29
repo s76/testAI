@@ -3,12 +3,14 @@ using System.Collections;
 
 public class Steering2
 {
-	public float speed=2;
+	public float speed=1;
 	public float turn_speed=4;
-	public float detect_range = 3;
-	public float strength = 2;
+	public float detect_range = 0.7f;
+	public float strength = 0.5f;
 
-	Vector3 dir;
+	public bool showDebug;
+
+	public Vector3 dir { get; private set; }
 
 	bool keep_side;		
 
@@ -69,9 +71,10 @@ public class Steering2
 	
 		var q = Quaternion.LookRotation(dir);
 
-		unit.rotation = Quaternion.Slerp(unit.rotation,q,turn_speed*Time.deltaTime);
-		unit.position += dir*speed*Time.deltaTime;
+
 		
+		unit.rotation = Quaternion.Slerp (unit.rotation, q, turn_speed * Time.deltaTime);
+		unit.position += dir * speed * Time.deltaTime;
 		return;
 	}
 
