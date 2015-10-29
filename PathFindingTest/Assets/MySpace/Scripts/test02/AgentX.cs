@@ -28,7 +28,6 @@ public class AgentX : MonoBehaviour {
 		arounds = new Collider[0];
 		
 		agent = GetComponent<NavMeshAgent> ();
-		agent.baseOffset = 0;
 		path  = new NavMeshPath();
 		core = GetComponent<UnitCore> ();
 	}	
@@ -109,7 +108,8 @@ public class AgentX : MonoBehaviour {
 			if ( c.transform == transform ) continue;
 			var _core = c.GetComponent<UnitCore>();
 			if ( _core != null ) {
-				if ( _core.side != core.side ) continue;
+				if ( _core.side != core.side ) {
+				}
 			}
 			var u = transform.position - c.transform.position;
 			var len =  Mathf.Clamp(radius - u.magnitude,0,radius);
@@ -123,10 +123,8 @@ public class AgentX : MonoBehaviour {
 		
 		_total = (steering.normalized+ to_target.normalized).normalized;
 
-		if (total == Vector3.zero ) {
-			if ( showLog ) Debug.Log("total = _total");
-			total = _total;
-		}
+		total = _total;
+
 		
 		if ( showLog) Debug.DrawLine (transform.position, transform.position + to_target.normalized*2, Color.red);
 		if ( showLog) Debug.DrawLine (transform.position, transform.position + steering.normalized, Color.green);
