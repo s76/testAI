@@ -40,7 +40,7 @@ public class AgentX2 : IPoolable {
 
 	NavMeshAgent agent;
 	NavMeshPath path;
-	AgentBehavior core;
+	AgentBehavior react;
 
 	
 	public Node2 current_node;
@@ -67,7 +67,7 @@ public class AgentX2 : IPoolable {
 		
 		agent = GetComponent<NavMeshAgent> ();
 		path  = new NavMeshPath();
-		core = GetComponent<AgentBehavior> ();
+		react = GetComponent<AgentBehavior> ();
 
 		id = global_id_counter ++;			
 		debug_attack_color = GetComponent<MeshRenderer> ().material.color;
@@ -179,8 +179,8 @@ public class AgentX2 : IPoolable {
 	public float reach_distance;
 
 
-	float speed = 2f;
-	float turn_speed = 2f;
+	float speed = 1f;
+	float turn_speed = 0.4f;
 	
 	Vector3 steering;
 	
@@ -211,9 +211,15 @@ public class AgentX2 : IPoolable {
 		//UnityEditor.Handles.DrawWireDisc (transform.position, transform.up, reach_distance);
 		
 	}
-	
-	void Update () {
 
+	void ReselectTarget () {
+		var r = GetClosestActiveEnemy ();
+		if (r != null) {
+			tracked_enemy = r;
+			last_tracked_enemy_id = r.id;
+		}
+	}
+	void Update () {
 		// set destination
 		if ( showLog ) Debug.Log("Update");
 		if (target_reached) {
@@ -233,6 +239,22 @@ public class AgentX2 : IPoolable {
 			Debug.LogError(e.StackTrace);
 		}
 
+		if (type == UnitType.Melee & !react.IsAttaking () ) {
+			RaycastHit shit;
+			if (Physics.SphereCast (new Ray(transform.position, path.corners [index]), hard_steer_range*0.75f, out shit)) {
+				AgentX2 k = shit.collider.GetComponent<AgentX2> ();
+				if (k != null) {
+					if (k.side != side) {
+						ReselectTarget ();
+					} else if (k.react.IsAttaking ()) {
+						Process (transform, Time.deltaTime);
+						return;
+					}
+				}
+			}
+
+		}
+
 		steering = Vector3.zero;
 		if (hard_steer_range > 0.1f) {
 			// calculate hard-steering
@@ -243,14 +265,20 @@ public class AgentX2 : IPoolable {
 					continue;
 
 				var p = c.ClosestPointOnBounds (transform.position);
-			
+
+
 				var u = transform.position - p;
 				var len = Mathf.Clamp (hard_steer_range - u.magnitude, 0, hard_steer_range);
+				var k = c.GetComponent<AgentX2>();
+				if ( k != null ) {
+					if ( k.type == UnitType.Melee ) len *=2f;
+					if ( type == UnitType.Ranger & react.IsAttaking() ) len*=3;
+				}
 				steering += u.normalized * len;
 			}
 		}
  
-		if (arounds_hard.Length <= 1 & !core.IsAttaking())  {
+		if (arounds_hard.Length <= 1 & !react.IsAttaking())  {
 			if ( showLog ) Debug.Log("soft_steer");
 			steering = Vector3.zero;
 
@@ -270,6 +298,7 @@ public class AgentX2 : IPoolable {
 				steering += u.normalized * len;
 			}
 		}
+
 
 
 		if (to_target.magnitude < stop_distance) {
@@ -304,5 +333,77 @@ public class AgentX2 : IPoolable {
 		}
 	}
 	
+	static Vector3 Vec90 ( Vector3 first , Vector3 normal ) {
+		Vector3 left90 = Quaternion.Euler (0, -90, 0) * first;
+		left90.Normalize ();
+		if (Vector3.Dot (left90, normal) > 0)
+			return left90;
+		return (Quaternion.Euler (0, 90, 0) * first).normalized;
+	}
+
+	Vector3 turn_side;
+	bool keep_side;
 	
+	public float strength = 0.5f;
+
+	public void Process (Transform unit, float delta ) {
+		var dir = unit.forward;
+		
+		Vector3 left45 = Quaternion.Euler(0, -50, 0) * dir* soft_steer_range*0.75f;
+		Vector3 right45 = Quaternion.Euler(0, 50, 0) * dir* soft_steer_range*0.75f;
+		
+		
+		Vector3 detect_ray = dir * soft_steer_range;
+		
+		RaycastHit hit, left_hit, right_hit;
+		
+		Vector3 main_steer = Vector3.zero;
+		Vector3 left_steer = Vector3.zero;
+		Vector3 right_steer = Vector3.zero;
+		
+		turn_side = unit.right;
+		
+		bool r = false, l= false;
+		if (l = Physics.SphereCast ( new Ray (unit.position, unit.position + left45), hard_steer_range * 0.4f, out left_hit)) {
+			if (!keep_side) { 
+				keep_side = true;
+				turn_side = unit.right;
+			}
+			
+			left_steer = Vec90(left_hit.point - unit.position,unit.forward) * 0.75f * strength ;
+			
+		} else if ( r = Physics.SphereCast ( new Ray (unit.position, unit.position + right45), hard_steer_range * 0.4f, out right_hit)) {
+			if (!keep_side) {
+				keep_side = true;
+				turn_side = -unit.right;	
+			}
+			right_steer = ReflectLineCast(right_hit.point - unit.position,unit.forward).normalized * 0.75f * strength ;
+		} 
+		
+		if (Physics.SphereCast (new Ray ( unit.position, unit.position + detect_ray) , hard_steer_range * 0.4f, out hit)) {
+			main_steer = turn_side;
+		} 
+		
+		if ( !r & !l) {
+			keep_side = false;
+		}
+		
+		
+		dir = (dir+ main_steer + left_steer + right_steer).normalized;
+		
+		var q = Quaternion.LookRotation(dir);
+
+		unit.rotation = Quaternion.Slerp (unit.rotation, q, turn_speed * Time.deltaTime);
+		unit.position += dir * speed/3 * Time.deltaTime;
+		return;
+	}
+	
+	static Vector3 ReflectLineCast (Vector3 first , Vector3 normal ) {
+		var u = first.normalized;
+		if ( Vector3.Dot(u,normal ) == 1 ) return normal;
+		var v1 = new Vector3(u.x,-u.y);
+		float k = Vector3.Dot(v1,normal);
+		if ( k > 0 ) return v1;
+		else return new Vector3(-u.x,first.y,u.y);
+	}
 }
