@@ -17,6 +17,8 @@ public enum UnitSide:int { Side01=0, Side02=1 }
 
 public enum UnitType { Melee, Ranger } 
 
+public enum AgentState { Move, Attack, Approach }
+
 public enum BehaviorState { MoveAlongPath, Attack, Approach, TryMoveAround, WaitInPosition }
 
 public class DebugX {

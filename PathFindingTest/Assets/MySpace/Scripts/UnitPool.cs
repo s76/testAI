@@ -4,24 +4,24 @@ using System.Collections.Generic;
 // customized pool
 public class UnitPool : MonoBehaviour {
 
-	public UnitCore prefab;
+	public AgentX2 prefab;
 	public int initCap;
 
-	List<UnitCore> list;
+	List<AgentX2> list;
 	
 	void Awake () {
 		if ( initCap < 0 ) throw new UnityException("initCap < 0 ");
 
-		list = new List<UnitCore>(initCap);
+		list = new List<AgentX2>(initCap);
 		for ( int i =0; i < initCap; i ++ ) {
-			UnitCore g = Instantiate<UnitCore>(prefab);
+			AgentX2 g = Instantiate<AgentX2>(prefab);
 			g.transform.SetParent(transform);
 			g.Deactivate();
 			list.Add(g);
 		}
 	}
 	
-	public UnitCore Get () {
+	public AgentX2 Get () {
 		foreach ( var o in list ) {
 			if ( o.IsFree() ) {
 				o.Activate();
@@ -29,7 +29,7 @@ public class UnitPool : MonoBehaviour {
 			}
 		}
 		
-		UnitCore g = Instantiate<UnitCore>(prefab);
+		AgentX2 g = Instantiate<AgentX2>(prefab);
 		g.transform.SetParent(transform);
 		g.Activate();
 		list.Add(g);

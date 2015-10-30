@@ -44,12 +44,14 @@ public class GameController : MonoBehaviour {
 
 	IEnumerator SpawnUnit () {
 		while (true) {
-			foreach ( var s in spawners ) {
-				for(int i=0; i < spawnAmountPerUnitType; i ++ ) {
+			for(int i=0; i < spawnAmountPerUnitType; i ++ ) {
+				foreach ( var s in spawners ) {
 					s.SpawnUnit(UnitType.Melee);
-					s.SpawnUnit(UnitType.Ranger);
+					if ( i%2 == 0 ) s.SpawnUnit(UnitType.Ranger);
 				}
+				yield return new WaitForSeconds(0.2f);
 			}
+
 			yield return new WaitForSeconds(spawnInterval);
 		}
 	}
