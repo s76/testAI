@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
+
 [RequireComponent(typeof(NavMeshAgent))]
 public class AgentX2 : IPoolable {
 	static int walls_mask = LayerMask.GetMask("walls");
