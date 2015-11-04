@@ -13,6 +13,7 @@ public class UnitParameters2 {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 public enum UnitSide:int { Side01=0, Side02=1 }
 
 public enum UnitType { Melee, Ranger } 
@@ -52,6 +53,8 @@ public class DebugX {
 	}
 }
 =======
+=======
+>>>>>>> parent of 096eefe... ???
 [System.Serializable] 
 public class UnitParameters {
 	public int hp_max;
@@ -64,4 +67,7 @@ public class UnitParameters {
 	public float attack_range;
 	public float move_speed;
 }
+<<<<<<< HEAD
+>>>>>>> parent of 096eefe... ???
+=======
 >>>>>>> parent of 096eefe... ???

@@ -48,7 +48,11 @@ public class GameController : MonoBehaviour {
 				foreach ( var s in spawners ) {
 					s.SpawnUnit(UnitType.Melee);
 <<<<<<< HEAD
+<<<<<<< HEAD
 					if ( i%2 == 0 ) s.SpawnUnit(UnitType.Ranger);
+=======
+					s.SpawnUnit(UnitType.Ranger);
+>>>>>>> parent of 096eefe... ???
 =======
 					s.SpawnUnit(UnitType.Ranger);
 >>>>>>> parent of 096eefe... ???
